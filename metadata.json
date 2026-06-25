@@ -1,0 +1,6 @@
+{
+  "name": "Presensi Digital Guru MUDM",
+  "description": "Aplikasi presensi digital untuk guru Madrasah Ibtidaiyah MUDM dengan visualisasi dashboard, input kehadiran harian, dan laporan rekapitulasi.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
