@@ -1,0 +1,36 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ "utama", "main" ]
+  pull_request:
+    branches: [ "utama", "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Run Linter & Tests
+      run: ./gradlew test
+
+    - name: Build Release APK
+      run: ./gradlew assembleRelease
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-release-apk
+        path: app/build/outputs/apk/release/app-release.apk
