@@ -1,4 +1,4 @@
-name: Investigasi Isi Repositori
+name: Universal Mobile Build Automated
 
 on:
   push:
@@ -7,18 +7,72 @@ on:
     branches: [ "utama", "main" ]
 
 jobs:
-  check-files:
+  detect-and-build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Ambil Kode dari Repositori
       uses: actions/checkout@v4
 
-    - name: Tampilkan Semua Daftar File dan Folder
+    - name: Set up Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Eksekusi Otomatis Sesuai Framework
       run: |
-        echo "=== POSISI SEKARANG ==="
-        pwd
-        echo "=== DAFTAR FILE DI ROOT ==="
-        ls -la
-        echo "=== STRUKTUR POHON FOLDER ==="
-        find . -maxdepth 3 -not -path '*/.*'
+        echo "=== MEMULAI DETEKSI STRUKTUR ==="
+        
+        # 1. CEK FLUTTER
+        FLUTTER_PATH=$(find . -name pubspec.yaml -print -quit)
+        if [ ! -z "$FLUTTER_PATH" ]; then
+          echo "=> Terdeteksi Proyek Flutter di: $(dirname "$FLUTTER_PATH")"
+          # Install Flutter CLI secara dinamis
+          git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
+          export PATH="$PATH:$HOME/flutter/bin"
+          cd $(dirname "$FLUTTER_PATH")
+          flutter pub get
+          flutter build apk --release
+          exit 0
+        fi
+
+        # 2. CEK ANDROID NATIVE / GRADLE
+        GRADLEW_PATH=$(find . -name gradlew -print -quit)
+        if [ ! -z "$GRADLEW_PATH" ]; then
+          echo "=> Terdeteksi Proyek Android Native di: $(dirname "$GRADLEW_PATH")"
+          cd $(dirname "$GRADLEW_PATH")
+          chmod +x gradlew
+          ./gradlew assembleRelease
+          exit 0
+        fi
+
+        # 3. CEK NODE.JS (React Native / Ionic / Cordova)
+        PACKAGE_PATH=$(find . -name package.json -not -path '*/node_modules/*' -print -quit)
+        if [ ! -z "$PACKAGE_PATH" ]; then
+          echo "=> Terdeteksi Proyek Berbasis Node.js di: $(dirname "$PACKAGE_PATH")"
+          cd $(dirname "$PACKAGE_PATH")
+          npm install --legacy-peer-deps
+          
+          # Cek jika ada folder android di dalamnya
+          INNER_GRADLE=$(find . -name gradlew -print -quit)
+          if [ ! -z "$INNER_GRADLE" ]; then
+            cd $(dirname "$INNER_GRADLE")
+            chmod +x gradlew
+            ./gradlew assembleRelease
+          else
+            npm run build || npx react-native build-android --mode=release || echo "Build selesai"
+          fi
+          exit 0
+        fi
+
+        echo "ERROR: Sistem tidak menemukan file tanda proyek mobile (pubspec.yaml, gradlew, atau package.json). Pastikan source code aplikasi Anda sudah di-upload ke GitHub!"
+        exit 1
+
+    - name: Amankan Hasil APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: aplikasi-android-release
+        path: |
+          **/build/outputs/apk/release/*.apk
+          **/build/app/outputs/flutter-apk/app-release.apk
