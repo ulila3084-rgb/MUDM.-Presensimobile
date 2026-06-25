@@ -1,4 +1,4 @@
-name: Universal Mobile Build Automated
+name: Build Android APK Only
 
 on:
   push:
@@ -7,7 +7,8 @@ on:
     branches: [ "utama", "main" ]
 
 jobs:
-  detect-and-build:
+  build-android:
+    # Menggunakan Linux (Ubuntu) karena jauh lebih cepat untuk build Android
     runs-on: ubuntu-latest
 
     steps:
@@ -20,59 +21,61 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Eksekusi Otomatis Sesuai Framework
+    - name: Jalankan Build Android Otomatis
       run: |
-        echo "=== MEMULAI DETEKSI STRUKTUR ==="
+        echo "=== MEMULAI PROSES BUILD APK ==="
         
-        # 1. CEK FLUTTER
+        # 1. JIKA PROYEK FLUTTER
         FLUTTER_PATH=$(find . -name pubspec.yaml -print -quit)
         if [ ! -z "$FLUTTER_PATH" ]; then
-          echo "=> Terdeteksi Proyek Flutter di: $(dirname "$FLUTTER_PATH")"
-          # Install Flutter CLI secara dinamis
+          echo "=> Terdeteksi proyek Flutter di: $(dirname "$FLUTTER_PATH")"
           git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
           export PATH="$PATH:$HOME/flutter/bin"
           cd $(dirname "$FLUTTER_PATH")
+          
           flutter pub get
+          echo "Membangun Android APK..."
           flutter build apk --release
           exit 0
         fi
 
-        # 2. CEK ANDROID NATIVE / GRADLE
+        # 2. JIKA PROYEK NODE.JS (React Native / Ionic / Cordova)
+        PACKAGE_PATH=$(find . -name package.json -not -path '*/node_modules/*' -print -quit)
+        if [ ! -z "$PACKAGE_PATH" ]; then
+          echo "=> Terdeteksi proyek berbasis Node.js di: $(dirname "$PACKAGE_PATH")"
+          cd $(dirname "$PACKAGE_PATH")
+          
+          npm install --legacy-peer-deps
+          
+          # Cari folder android secara dinamis
+          ANDROID_DIR=$(find . -name gradlew -print -quit)
+          if [ ! -z "$ANDROID_DIR" ]; then
+            cd $(dirname "$ANDROID_DIR")
+            chmod +x gradlew
+            ./gradlew assembleRelease
+          else
+            npx react-native build-android --mode=release || npm run build || echo "Build selesai"
+          fi
+          exit 0
+        fi
+
+        # 3. JIKA PROYEK ANDROID NATIVE (Java / Kotlin)
         GRADLEW_PATH=$(find . -name gradlew -print -quit)
         if [ ! -z "$GRADLEW_PATH" ]; then
-          echo "=> Terdeteksi Proyek Android Native di: $(dirname "$GRADLEW_PATH")"
+          echo "=> Terdeteksi proyek Android Native di: $(dirname "$GRADLEW_PATH")"
           cd $(dirname "$GRADLEW_PATH")
           chmod +x gradlew
           ./gradlew assembleRelease
           exit 0
         fi
 
-        # 3. CEK NODE.JS (React Native / Ionic / Cordova)
-        PACKAGE_PATH=$(find . -name package.json -not -path '*/node_modules/*' -print -quit)
-        if [ ! -z "$PACKAGE_PATH" ]; then
-          echo "=> Terdeteksi Proyek Berbasis Node.js di: $(dirname "$PACKAGE_PATH")"
-          cd $(dirname "$PACKAGE_PATH")
-          npm install --legacy-peer-deps
-          
-          # Cek jika ada folder android di dalamnya
-          INNER_GRADLE=$(find . -name gradlew -print -quit)
-          if [ ! -z "$INNER_GRADLE" ]; then
-            cd $(dirname "$INNER_GRADLE")
-            chmod +x gradlew
-            ./gradlew assembleRelease
-          else
-            npm run build || npx react-native build-android --mode=release || echo "Build selesai"
-          fi
-          exit 0
-        fi
-
-        echo "ERROR: Sistem tidak menemukan file tanda proyek mobile (pubspec.yaml, gradlew, atau package.json). Pastikan source code aplikasi Anda sudah di-upload ke GitHub!"
+        echo "ERROR: Kode sumber aplikasi tidak ditemukan! Pastikan Anda sudah mengunggah (push) seluruh file proyek dari komputer ke GitHub."
         exit 1
 
-    - name: Amankan Hasil APK
+    - name: Simpan dan Upload Hasil APK
       uses: actions/upload-artifact@v4
       with:
-        name: aplikasi-android-release
+        name: MUDM-Presensimobile-APK
         path: |
           **/build/outputs/apk/release/*.apk
           **/build/app/outputs/flutter-apk/app-release.apk
