@@ -1,4 +1,4 @@
-name: Mobile Build CI (Node-Based)
+name: Investigasi Isi Repositori
 
 on:
   push:
@@ -7,60 +7,18 @@ on:
     branches: [ "utama", "main" ]
 
 jobs:
-  build:
+  check-files:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
+    - name: Ambil Kode dari Repositori
       uses: actions/checkout@v4
 
-    - name: Deteksi Folder Project
+    - name: Tampilkan Semua Daftar File dan Folder
       run: |
-        PACKAGE_PATH=$(find . -name package.json -not -path '*/node_modules/*' -print -quit)
-        if [ -z "$PACKAGE_PATH" ]; then
-          echo "ERROR: File package.json tidak ditemukan!"
-          exit 1
-        fi
-        NODE_DIR=$(dirname "$PACKAGE_PATH")
-        echo "Project ditemukan di folder: $NODE_DIR"
-        echo "NODE_DIR=$NODE_DIR" >> $GITHUB_ENV
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        # Mengurangi validasi lockfile ketat di root
-
-    - name: Set up Java JDK
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-
-    - name: Install Dependencies
-      run: |
-        cd ${{ env.NODE_DIR }}
-        npm install --legacy-peer-deps
-
-    - name: Coba Build Android APK
-      run: |
-        cd ${{ env.NODE_DIR }}
-        # Mencari folder android secara dinamis dan mengeksekusi gradlew jika ada
-        ANDROID_DIR=$(find . -name gradlew -print -quit)
-        if [ ! -z "$ANDROID_DIR" ]; then
-          cd $(dirname "$ANDROID_DIR")
-          chmod +x gradlew
-          ./gradlew assembleRelease
-        else
-          echo "Mencoba build menggunakan CLI bawaan..."
-          npx react-native build-android --mode=release || npm run build || echo "Selesai"
-        fi
-      continue-on-error: true
-
-    - name: Upload Semua Hasil APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: mobile-apk-release
-        path: |
-          **/build/outputs/apk/release/*.apk
-          **/android/app/build/outputs/apk/release/*.apk
+        echo "=== POSISI SEKARANG ==="
+        pwd
+        echo "=== DAFTAR FILE DI ROOT ==="
+        ls -la
+        echo "=== STRUKTUR POHON FOLDER ==="
+        find . -maxdepth 3 -not -path '*/.*'
