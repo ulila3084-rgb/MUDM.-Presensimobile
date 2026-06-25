@@ -277,6 +277,46 @@ export default function MobileExport() {
         {/* Option 2: Install as PWA Directly */}
         <div className="space-y-6">
           
+          {/* GitHub Actions Auto Build (NEWLY ADDED) */}
+          <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl border border-indigo-700/30 p-5 shadow-sm text-white space-y-4">
+            <div className="flex items-center gap-2 border-b border-indigo-500/20 pb-3">
+              <span className="p-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg animate-pulse">
+                <Sparkles className="w-5 h-5" />
+              </span>
+              <h3 className="text-xs font-black uppercase tracking-widest text-indigo-200">
+                Otomatisasi GitHub Actions (APK)
+              </h3>
+            </div>
+
+            <p className="text-xs text-indigo-100/90 leading-relaxed text-justify">
+              <strong>Kabar Gembira!</strong> Kami telah mengonfigurasi formula build otomatis Android langsung di dalam proyek ini menggunakan <strong>GitHub Actions</strong> (<code>.github/workflows/android.yml</code>) dan <strong>CapacitorJS</strong>.
+            </p>
+
+            <div className="bg-indigo-950/50 p-3 rounded-xl border border-indigo-500/20 space-y-2">
+              <div className="text-[11px] font-black text-indigo-300 flex items-center gap-1.5">
+                <span>⚠️ Mengapa Sebelumnya Gagal / "Tidak Ada File"?</span>
+              </div>
+              <p className="text-[10px] text-indigo-200/80 leading-relaxed">
+                Sebelumnya, repositori GitHub Anda belum memiliki file codingan lengkap dan belum terpasang konfigurasi build Android (Capacitor). Sekarang semua file sudah lengkap dan siap!
+              </p>
+            </div>
+
+            <div className="space-y-2.5 pt-1 text-[11px]">
+              <div className="flex gap-2">
+                <span className="text-indigo-300 font-bold">1.</span>
+                <p className="text-indigo-100/80">Cukup <strong>Export ke GitHub</strong> melalui menu pengaturan AI Studio Anda.</p>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-indigo-300 font-bold">2.</span>
+                <p className="text-indigo-100/80">GitHub akan mendeteksi file workflow otomatis kita dan mulai merakit APK.</p>
+              </div>
+              <div className="flex gap-2">
+                <span className="text-indigo-300 font-bold">3.</span>
+                <p className="text-indigo-100/80">Masuk ke tab <strong>"Actions"</strong> di GitHub Anda, klik build yang berjalan, dan unduh file <strong>Presensi-MUDM-Android-APK</strong> setelah selesai!</p>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
             
             <div className="flex items-center gap-2 border-b border-slate-50 pb-3">

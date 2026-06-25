@@ -1,0 +1,6 @@
+{
+  "appId": "com.mudm.presensiguru",
+  "appName": "Presensi MUDM",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}
