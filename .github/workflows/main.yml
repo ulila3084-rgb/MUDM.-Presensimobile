@@ -1,4 +1,4 @@
-name: Cek Struktur Proyek
+name: React Native Android Build
 
 on:
   push:
@@ -7,17 +7,39 @@ on:
     branches: [ "utama", "main" ]
 
 jobs:
-  inspect:
+  build:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: List Semua File dan Folder
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Set up Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Generate Android Folder (Jika belum ada)
+      run: npx react-native@latest gen-env-files || echo "Android folder ready"
+
+    - name: Build Android App
       run: |
-        echo "=== DAFTAR FOLDER DI ROOT ==="
-        ls -la
-        echo "============================="
-        echo "=== MENCARI FILE PENTING ==="
-        find . -maxdepth 3 -not -path '*/.*'
+        cd android && chmod +x gradlew
+        ./gradlew assembleRelease
+      continue-on-error: true
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: react-native-apk
+        path: android/app/build/outputs/apk/release/*.apk
