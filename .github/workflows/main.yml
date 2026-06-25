@@ -8,7 +8,6 @@ on:
 
 jobs:
   build-android:
-    # Menggunakan Linux (Ubuntu) karena jauh lebih cepat untuk build Android
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +33,6 @@ jobs:
           cd $(dirname "$FLUTTER_PATH")
           
           flutter pub get
-          echo "Membangun Android APK..."
           flutter build apk --release
           exit 0
         fi
@@ -47,7 +45,6 @@ jobs:
           
           npm install --legacy-peer-deps
           
-          # Cari folder android secara dinamis
           ANDROID_DIR=$(find . -name gradlew -print -quit)
           if [ ! -z "$ANDROID_DIR" ]; then
             cd $(dirname "$ANDROID_DIR")
@@ -69,7 +66,7 @@ jobs:
           exit 0
         fi
 
-        echo "ERROR: Kode sumber aplikasi tidak ditemukan! Pastikan Anda sudah mengunggah (push) seluruh file proyek dari komputer ke GitHub."
+        echo "ERROR: Kode sumber aplikasi tidak ditemukan!"
         exit 1
 
     - name: Simpan dan Upload Hasil APK
