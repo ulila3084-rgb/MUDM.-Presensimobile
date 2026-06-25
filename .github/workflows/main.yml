@@ -20,11 +20,6 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Set up Node.js (Versi Terbaru)
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22' # Menggunakan versi terbaru untuk hilangkan warning
-
     - name: Jalankan Build Android Otomatis
       run: |
         echo "=== MEMULAI PROSES BUILD APK ==="
@@ -74,10 +69,9 @@ jobs:
         echo "ERROR: Kode sumber aplikasi tidak ditemukan!"
         exit 1
 
-    - name: Simpan dan Upload Hasil APK
+    - name: Cari dan Unggah File APK Secara Agresif
       uses: actions/upload-artifact@v4
       with:
         name: MUDM-Presensimobile-APK
         path: |
-          **/build/outputs/apk/release/*.apk
-          **/build/app/outputs/flutter-apk/app-release.apk
+          **/*.apk
