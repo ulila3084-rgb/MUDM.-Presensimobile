@@ -25,14 +25,31 @@ jobs:
       with:
         channel: 'stable'
 
+    - name: Deteksi Folder Proyek Flutter
+      run: |
+        PUBSPEC_PATH=$(find . -name pubspec.yaml -print -quit)
+        if [ -z "$PUBSPEC_PATH" ]; then
+          echo "ERROR: File pubspec.yaml tidak ditemukan! Apakah ini proyek Flutter?"
+          exit 1
+        fi
+        FLUTTER_DIR=$(dirname "$PUBSPEC_PATH")
+        echo "Proyek Flutter ditemukan di folder: $FLUTTER_DIR"
+        echo "FLUTTER_DIR=$FLUTTER_DIR" >> $GITHUB_ENV
+
     - name: Ambil Dependencies
-      run: flutter pub get
+      run: |
+        cd ${{ env.FLUTTER_DIR }}
+        flutter pub get
 
     - name: Build APK Release
-      run: flutter build apk --release
+      run: |
+        cd ${{ env.FLUTTER_DIR }}
+        flutter build apk --release
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: release-apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        path: |
+          **/build/app/outputs/flutter-apk/app-release.apk
+          **/build/app/outputs/apk/release/app-release.apk
