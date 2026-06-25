@@ -1,4 +1,4 @@
-name: Android CI
+name: Flutter Build CI
 
 on:
   push:
@@ -20,17 +20,19 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Set up Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
 
-    - name: Run Linter & Tests
-      run: ./gradlew test
+    - name: Install dependencies
+      run: flutter pub get
 
-    - name: Build Release APK
-      run: ./gradlew assembleRelease
+    - name: Build Android APK
+      run: flutter build apk --release
 
     - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: android-release-apk
-        path: app/build/outputs/apk/release/app-release.apk
+        name: release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
